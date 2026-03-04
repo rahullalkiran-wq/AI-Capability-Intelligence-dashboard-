@@ -411,11 +411,28 @@ h1 .sub{display:block;color:var(--mist);font-size:.72em;font-weight:200;}
 
 /* Dedicated Sources Section */
 .srclist{display:flex;flex-direction:column;gap:14px;}
-.src-row{background:var(--s2);border:1px solid var(--b1);border-radius:12px;padding:18px;display:flex;align-items:center;gap:18px;}
+.src-row{background:var(--s2);border:1px solid var(--b1);border-radius:12px;padding:20px;display:flex;align-items:flex-start;gap:18px;}
 .src-icon{font-size:26px;background:var(--s3);width:54px;height:54px;display:grid;place-items:center;border-radius:12px;border:1px solid var(--b2);flex-shrink:0;}
 .src-info{flex:1;}
-.src-name{font-family:'DM Mono',monospace;font-size:12px;color:var(--white);letter-spacing:.05em;margin-bottom:6px;text-transform:uppercase;}
-.src-desc{font-size:14px;color:var(--mist);line-height:1.5;}
+.src-name{font-family:'DM Mono',monospace;font-size:13px;color:var(--white);letter-spacing:.05em;margin-bottom:6px;text-transform:uppercase;font-weight:600;}
+.src-desc{font-size:14px;color:var(--mist);line-height:1.5; margin-bottom: 6px;}
+
+/* New: Link Styling for Sources */
+.src-link { 
+  color: var(--teal); 
+  font-family: 'DM Mono', monospace; 
+  font-size: 11px; 
+  text-decoration: none; 
+  display: inline-flex; 
+  align-items: center; 
+  gap: 6px;
+  transition: all 0.2s; 
+  background: rgba(62,207,191,0.05);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(62,207,191,0.15);
+}
+.src-link:hover { color: var(--green); border-color: rgba(74,222,128,0.3); background: rgba(74,222,128,0.08); }
 
 /* History */
 .histsec{margin-bottom:40px;}
@@ -869,7 +886,31 @@ async function makeDemo(co){
   await sleep(4200);
   const isFrac = co.toLowerCase().includes('fractal');
   const sc = isFrac?78:Math.floor(Math.random()*30+52);
-  const srcMap = {auto:['wikipedia','duckduckgo','google_news','youtube'], both:['wikipedia','duckduckgo','google_news','pdf_prospectus','website','youtube'], provided:['pdf_prospectus','website','youtube']};
+  
+  // Create realistic URLs for the demo mode based on the inputs
+  const pdfInput = document.getElementById('pdfin').value;
+  const linkInput = document.getElementById('lnkin').value.split(',')[0];
+  
+  const srcMap = {
+    auto: [
+      { type: 'wikipedia', url: `https://en.wikipedia.org/wiki/${encodeURIComponent(co)}` },
+      { type: 'duckduckgo', url: `https://duckduckgo.com/?q=${encodeURIComponent(co + ' AI technology')}` },
+      { type: 'google_news', url: `https://news.google.com/search?q=${encodeURIComponent(co + ' AI')}` },
+      { type: 'youtube', url: `https://youtube.com/results?search_query=${encodeURIComponent(co + ' AI keynote')}` }
+    ],
+    both: [
+      { type: 'pdf_prospectus', url: pdfInput },
+      { type: 'website', url: linkInput },
+      { type: 'wikipedia', url: `https://en.wikipedia.org/wiki/${encodeURIComponent(co)}` },
+      { type: 'youtube', url: `https://youtube.com/results?search_query=${encodeURIComponent(co + ' AI')}` }
+    ],
+    provided: [
+      { type: 'pdf_prospectus', url: pdfInput },
+      { type: 'website', url: linkInput },
+      { type: 'youtube', url: `https://youtube.com/results?search_query=${encodeURIComponent(co + ' AI')}` }
+    ]
+  };
+  
   return {
     company:co, overall_score:sc,
     grade:sc>=80?'A':sc>=65?'B':sc>=50?'C':sc>=35?'D':'F',
@@ -929,7 +970,7 @@ function renderResults(data){
   document.getElementById('risklist').innerHTML=(data.risks||[]).map(r=>`<li>${r}</li>`).join('');
 
   renderEvidence(data.dimensions||{});
-  renderDetailedSources(srcs); // Render the new section
+  renderDetailedSources(srcs); // Render the new section with Links
 
   setTimeout(()=>document.getElementById('rpage').scrollIntoView({behavior:'smooth',block:'start'}),120);
 }
@@ -940,7 +981,6 @@ function animScore(target){
   fill.style.stroke=col;
   let n=0; const step=target/80;
   const iv=setInterval(()=>{ n=Math.min(n+step,target); num.textContent=Math.round(n); if(n>=target)clearInterval(iv); },18);
-  // r=74 -> circ = 465
   setTimeout(()=>{ fill.style.strokeDashoffset=465-(465*target/100); },100);
 }
 
@@ -950,11 +990,16 @@ function renderSources(srcs, mode){
   const ml={auto:'🌐 Auto',both:'⚡ Both',provided:'📎 Provided'};
   bar.innerHTML='<span class="sbarlbl">Sources Pulled</span>';
   if(mode) bar.innerHTML+=`<span class="schip" style="border-color:${mc[mode]||'var(--b1)'};color:${mc[mode]||'var(--mist)'}">${ml[mode]||mode}</span>`;
-  srcs.forEach(s=>{ bar.innerHTML+=`<span class="schip">${SRCICONS[s]||'📌 '+s}</span>`; });
+  
+  srcs.forEach(s=>{ 
+    const type = typeof s === 'string' ? s : (s.type || s.name || 'unknown');
+    bar.innerHTML+=`<span class="schip">${SRCICONS[type]||'📌 '+type}</span>`; 
+  });
+  
   if(RESULT?.tokens_used) bar.innerHTML+=`<span class="schip">🔢 ${RESULT.tokens_used.toLocaleString()} tokens</span>`;
 }
 
-// NEW FUNCTION: Renders the detailed sources list
+// NEW FUNCTION: Renders the detailed sources list WITH actual URLs
 function renderDetailedSources(srcs){
   const list = document.getElementById('srclist');
   if(!srcs || !srcs.length){
@@ -962,14 +1007,30 @@ function renderDetailedSources(srcs){
     return;
   }
   
+  // Fallbacks if n8n doesn't return the URL directly
+  const inputPdfUrl = document.getElementById('pdfin').value;
+  const inputLinksUrl = document.getElementById('lnkin').value.split(',')[0];
+
   list.innerHTML = srcs.map(s => {
-    const def = SRC_DETAILS[s] || { i:'📌', n:s.replace(/_/g, ' '), d:'Additional context provided directly from pipeline.' };
+    // Determine the type (works whether n8n sends a simple array of strings or an array of objects)
+    const type = typeof s === 'string' ? s : (s.type || s.name || 'unknown');
+    
+    // Attempt to extract the actual URL from the payload, or fallback to user input
+    let finalUrl = typeof s === 'object' && s.url ? s.url : '';
+    if (!finalUrl && type === 'pdf_prospectus' && inputPdfUrl) finalUrl = inputPdfUrl;
+    if (!finalUrl && type === 'website' && inputLinksUrl) finalUrl = inputLinksUrl;
+    
+    const def = SRC_DETAILS[type] || { i:'📌', n:type.replace(/_/g, ' '), d:'Context processed directly from pipeline integration.' };
+    
+    const linkHtml = finalUrl ? `<a href="${finalUrl}" target="_blank" class="src-link">↗ View Source Document</a>` : '';
+    
     return `
       <div class="src-row">
         <div class="src-icon">${def.i}</div>
         <div class="src-info">
           <div class="src-name">${def.n}</div>
           <div class="src-desc">${def.d}</div>
+          ${linkHtml}
         </div>
       </div>
     `;
