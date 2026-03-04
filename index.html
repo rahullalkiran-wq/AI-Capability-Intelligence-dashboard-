@@ -93,7 +93,21 @@ body::before{
   border:1px solid transparent;transition:all .2s;
 }
 .npill:hover,.npill.on{color:var(--snow);background:var(--s2);border-color:var(--b1);}
-.nav-r{display:flex;align-items:center;gap:10px;}
+.nav-r{display:flex;align-items:center;gap:15px;}
+.wh-toggle-btn{
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--b1);
+  border-radius: 20px;
+  padding: 5px 12px;
+  color: var(--mist);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all .2s;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.wh-toggle-btn:hover{ color: var(--gold); border-color: var(--gold); background: rgba(212,168,67,0.1); }
 .conn-pill{
   display:flex;align-items:center;gap:6px;
   font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;
@@ -133,15 +147,9 @@ body::before{
 }
 .whbtn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(212,168,67,.3);}
 .whst{font-family:'DM Mono',monospace;font-size:11px;min-width:80px;white-space:nowrap;}
-.whhide{
-  background:none;border:1px solid var(--b1);border-radius:6px;
-  padding:5px 10px;color:var(--dust);font-family:'DM Mono',monospace;font-size:10px;
-  cursor:pointer;transition:all .2s;white-space:nowrap;
-}
-.whhide:hover{color:var(--fog);border-color:var(--b2);}
 
 /* PAGE */
-.page{padding-top:120px;}
+.page{padding-top:120px; transition: padding-top 0.3s cubic-bezier(.4,0,.2,1);}
 
 /* HERO */
 .hero{
@@ -225,7 +233,6 @@ h1 .sub{display:block;color:var(--mist);font-size:.72em;font-weight:200;}
 .mopt:hover{border-color:var(--b2);}
 .mopt.sel{border-color:var(--gold);background:rgba(212,168,67,.06);}
 .mopt.sel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
-.mopt.disabled{opacity:.3;pointer-events:none;}
 .mopt-ico{font-size:18px;margin-bottom:4px;}
 .mopt-lbl{font-family:'DM Mono',monospace;font-size:9px;color:var(--mist);letter-spacing:.05em;text-transform:uppercase;display:block;}
 .mopt.sel .mopt-lbl{color:var(--gold);}
@@ -447,7 +454,6 @@ h1 .sub{display:block;color:var(--mist);font-size:.72em;font-weight:200;}
 <div class="amb amb2"></div>
 <div class="amb amb3"></div>
 
-<!-- LOADING OVERLAY -->
 <div class="loverlay" id="loverlay">
   <div class="lorb">
     <div class="lring lr1"></div>
@@ -468,7 +474,6 @@ h1 .sub{display:block;color:var(--mist);font-size:.72em;font-weight:200;}
   <div class="lchips" id="lchips"></div>
 </div>
 
-<!-- NAV -->
 <nav class="nav">
   <div class="nav-brand">
     <div class="nav-gem">V</div>
@@ -479,6 +484,7 @@ h1 .sub{display:block;color:var(--mist);font-size:.72em;font-weight:200;}
     <div class="npill" onclick="scrollHistory()">History</div>
   </div>
   <div class="nav-r">
+    <button class="wh-toggle-btn" onclick="toggleWH()" id="whToggleBtn">⚙️ Show Webhook</button>
     <div class="conn-pill off" id="connPill">
       <div class="cdot"></div>
       <span id="connTxt">Not Connected</span>
@@ -486,21 +492,17 @@ h1 .sub{display:block;color:var(--mist);font-size:.72em;font-weight:200;}
   </div>
 </nav>
 
-<!-- WEBHOOK BAR -->
-<div class="whbar" id="whbar">
+<div class="whbar" id="whbar" style="transform: translateY(-100%);">
   <span class="whlbl"><span>⬡</span> n8n Webhook</span>
   <input type="text" id="whinput" class="whinput" placeholder="https://xxxx.ngrok.io/webhook/analyze-company  ·  or  ·  http://localhost:5678/webhook/analyze-company"/>
   <button class="whbtn" onclick="saveWH()">Connect</button>
   <span class="whst" id="whst"></span>
-  <button class="whhide" onclick="toggleWH()" id="whhide">Hide ↑</button>
 </div>
 
 <div class="wrap">
-<div class="page" id="mainpage">
+<div class="page" id="mainpage" style="padding-top: 80px;">
 
-  <!-- HERO -->
   <div class="hero" id="heroArea">
-    <!-- LEFT -->
     <div class="fu d1">
       <div class="hero-tag"><div class="htdot"></div>AI Capability Intelligence</div>
       <h1>Score any<br><em>company's</em><span class="sub">AI maturity</span></h1>
@@ -512,7 +514,6 @@ h1 .sub{display:block;color:var(--mist);font-size:.72em;font-weight:200;}
       </div>
     </div>
 
-    <!-- PANEL -->
     <div class="fu d2">
       <div class="panel">
         <div class="panel-top">
@@ -521,20 +522,17 @@ h1 .sub{display:block;color:var(--mist);font-size:.72em;font-weight:200;}
         </div>
         <div class="pb">
 
-          <!-- Company -->
-          <input type="text" id="cinput" class="cinput" placeholder="Company name…" autocomplete="off" oninput="onCo()" onkeydown="if(event.key==='Enter')doAnalyze()"/>
+          <input type="text" id="cinput" class="cinput" placeholder="Company name…" autocomplete="off" onkeydown="if(event.key==='Enter')doAnalyze()"/>
 
-          <!-- Quick picks -->
           <div class="qrow">
             <span class="qlbl">Quick →</span>
             <button class="qb" onclick="qf('Fractal Analytics','https://fractal.ai/docs/Investor-Relations/Offer-Documents/Fractal-Prospectus.pdf','https://fractal.ai/investor-relations')">Fractal</button>
-            <button class="qb" onclick="qf('Infosys','','')">Infosys</button>
-            <button class="qb" onclick="qf('Wipro','','')">Wipro</button>
-            <button class="qb" onclick="qf('TCS','','')">TCS</button>
-            <button class="qb" onclick="qf('Mu Sigma','','')">Mu Sigma</button>
+            <button class="qb" onclick="qf('Infosys','https://www.infosys.com/investors/reports-filings/annual-report/annual-report-2023.pdf','https://www.infosys.com/investors.html')">Infosys</button>
+            <button class="qb" onclick="qf('Wipro','https://www.wipro.com/content/dam/nexus/en/investor/annual-reports/2022-2023/annual-report-for-fy-2022-23.pdf','https://www.wipro.com/investors/')">Wipro</button>
+            <button class="qb" onclick="qf('TCS','https://www.tcs.com/content/dam/tcs/investor-relations/financial-statements/2022-23/ar/annual-report-2022-2023.pdf','https://www.tcs.com/investor-relations')">TCS</button>
+            <button class="qb" onclick="qf('Mu Sigma','','https://www.mu-sigma.com/')">Mu Sigma</button>
           </div>
 
-          <!-- SOURCE MODE -->
           <div class="srcbox">
             <div class="srcbox-title">
               Data Source Mode
@@ -545,36 +543,33 @@ h1 .sub{display:block;color:var(--mist);font-size:.72em;font-weight:200;}
                 <div class="mopt-ico">🌐</div>
                 <span class="mopt-lbl">Auto Fetch</span>
               </div>
-              <div class="mopt disabled" id="mBoth" onclick="setMode('both')">
+              <div class="mopt" id="mBoth" onclick="setMode('both')">
                 <div class="mopt-ico">⚡</div>
                 <span class="mopt-lbl">Both</span>
               </div>
-              <div class="mopt disabled" id="mProvided" onclick="setMode('provided')">
+              <div class="mopt" id="mProvided" onclick="setMode('provided')">
                 <div class="mopt-ico">📎</div>
                 <span class="mopt-lbl">Provided Only</span>
               </div>
             </div>
           </div>
 
-          <!-- Manual fields -->
           <div class="mfields" id="mfields">
             <div class="fg">
               <label class="flbl">PDF URL</label>
-              <input type="url" id="pdfin" class="fi" placeholder="https://company.com/annual-report.pdf" oninput="onLinks()"/>
+              <input type="url" id="pdfin" class="fi" placeholder="https://company.com/annual-report.pdf" />
             </div>
             <div class="fg">
               <label class="flbl">Extra Links (comma separated)</label>
-              <input type="text" id="lnkin" class="fi" placeholder="https://company.com/ir, https://company.com/ai" oninput="onLinks()"/>
+              <input type="text" id="lnkin" class="fi" placeholder="https://company.com/ir, https://company.com/ai" />
             </div>
           </div>
 
-          <!-- Status -->
           <div class="fst auto" id="fst">
             <span>🌐</span>
             <span id="fsttxt">Auto fetch — Wikipedia · DuckDuckGo · Google News · YouTube</span>
           </div>
 
-          <!-- Button -->
           <button class="abtn" id="goBtn" onclick="doAnalyze()">
             <span>Analyze AI Capabilities</span>
             <span class="abtn-arr">→</span>
@@ -590,10 +585,8 @@ h1 .sub{display:block;color:var(--mist);font-size:.72em;font-weight:200;}
     </div>
   </div>
 
-  <!-- RESULTS -->
   <div class="rpage" id="rpage">
 
-    <!-- Score Hero -->
     <div class="shero fu">
       <div>
         <div class="res-eye">AI Capability Report</div>
@@ -619,12 +612,10 @@ h1 .sub{display:block;color:var(--mist);font-size:.72em;font-weight:200;}
       </div>
     </div>
 
-    <!-- Sources -->
     <div class="sbar" id="sbar">
       <span class="sbarlbl">Sources Used</span>
     </div>
 
-    <!-- Radar + Dimensions -->
     <div class="g2 fu d1">
       <div class="rc">
         <div class="rctitle">Capability Radar</div>
@@ -636,7 +627,6 @@ h1 .sub{display:block;color:var(--mist);font-size:.72em;font-weight:200;}
       </div>
     </div>
 
-    <!-- Strengths + Risks -->
     <div class="sg fu d2">
       <div class="src str-c">
         <div class="shdr shdr-s">✓ Key Strengths</div>
@@ -648,13 +638,11 @@ h1 .sub{display:block;color:var(--mist);font-size:.72em;font-weight:200;}
       </div>
     </div>
 
-    <!-- Evidence -->
     <div class="rc fu d3" style="margin-bottom:18px">
       <div class="rctitle">Evidence & Findings</div>
       <div class="evlist" id="evlist"></div>
     </div>
 
-    <!-- Actions -->
     <div class="abar fu d4">
       <button class="abtn2" onclick="dlJSON()">↓ JSON Report</button>
       <button class="abtn2" onclick="dlCSV()">↓ CSV Export</button>
@@ -663,13 +651,11 @@ h1 .sub{display:block;color:var(--mist);font-size:.72em;font-weight:200;}
 
   </div>
 
-  <!-- HISTORY -->
   <div class="histsec" id="histsec" style="display:none">
     <div class="histhdr">Recent Analyses</div>
     <div class="hgrid" id="hgrid"></div>
   </div>
 
-  <!-- FOOTER -->
   <div class="footer">
     <span>Vayana Network · AI Intelligence Platform · v2.0</span>
     <span>n8n + Groq LLM + Supabase · Built for Vayana Internship 2026</span>
@@ -709,7 +695,7 @@ let RESULT = null;
 let RADAR = null;
 let HIST = JSON.parse(localStorage.getItem('vay_hist_v2')||'[]');
 let LTIMER = null;
-let WHVIS = true;
+let WHVIS = false; // Start hidden
 
 const DIMS = {
   ai_products_ip:     {label:'AI Products & IP',    w:25, col:'#d4a843'},
@@ -733,7 +719,6 @@ window.addEventListener('DOMContentLoaded',()=>{
   if(wh){ document.getElementById('whinput').value=wh; document.getElementById('whinput').classList.add('ok'); setConn('live'); setWhSt('✅ Connected','var(--green)'); }
   updateModeUI();
   renderHist();
-  document.getElementById('cinput').addEventListener('keydown',e=>{ if(e.key==='Enter') doAnalyze(); });
 });
 
 // ══════════════════════════════════════
@@ -755,23 +740,29 @@ function setConn(s){
   const map={live:'Connected',demo:'Demo Mode',off:'Not Connected'};
   p.className='conn-pill '+s; t.textContent=map[s]||s;
 }
+
+// FIX: Made the toggle slide the bar down safely without removing the button!
 function toggleWH(){
   WHVIS=!WHVIS;
-  const bar=document.getElementById('whbar'),btn=document.getElementById('whhide'),pg=document.querySelector('.page');
-  if(WHVIS){ bar.style.transform='translateY(0)'; pg.style.paddingTop='120px'; btn.textContent='Hide ↑'; }
-  else{ bar.style.transform='translateY(-100%)'; pg.style.paddingTop='80px'; btn.textContent='Show ↓'; }
+  const bar=document.getElementById('whbar'), btn=document.getElementById('whToggleBtn'), pg=document.querySelector('.page');
+  if(WHVIS){ 
+    bar.style.transform='translateY(0)'; 
+    pg.style.paddingTop='120px'; 
+    btn.innerHTML='⚙️ Hide Webhook'; 
+  } else { 
+    bar.style.transform='translateY(-100%)'; 
+    pg.style.paddingTop='80px'; 
+    btn.innerHTML='⚙️ Show Webhook'; 
+  }
 }
 
 // ══════════════════════════════════════
 // MODE
 // ══════════════════════════════════════
-function onCo(){ updateModeUI(); }
-function onLinks(){ updateModeUI(); }
-
+// FIX: Removed the "Lockout" logic. Now you can set the mode freely.
 function setMode(m){
-  const hasData = getLinks();
-  if((m==='both'||m==='provided')&&!hasData.any){ m='auto'; }
-  MODE=m; updateModeUI();
+  MODE=m; 
+  updateModeUI();
 }
 
 function getLinks(){
@@ -781,26 +772,18 @@ function getLinks(){
 }
 
 function updateModeUI(){
-  const {any} = getLinks();
-  if(!any) MODE='auto';
-
-  // selected state
+  // Update button selection highlights
   ['mAuto','mBoth','mProvided'].forEach(id=>document.getElementById(id).classList.remove('sel'));
   const map={auto:'mAuto',both:'mBoth',provided:'mProvided'};
   document.getElementById(map[MODE]).classList.add('sel');
 
-  // enable/disable
-  ['mBoth','mProvided'].forEach(id=>{
-    document.getElementById(id).classList.toggle('disabled',!any);
-  });
+  // Show/Hide the Auto badge
+  document.getElementById('autobadge').style.display = (MODE==='auto')?'inline-flex':'none';
 
-  // auto badge
-  document.getElementById('autobadge').style.display = any?'none':'inline-flex';
-
-  // manual fields
+  // FIX: Open the manual fields whenever 'Both' or 'Provided' is clicked
   document.getElementById('mfields').classList.toggle('open', MODE!=='auto');
 
-  // status message
+  // Update Status Text
   const st=document.getElementById('fst'), tx=document.getElementById('fsttxt');
   if(MODE==='auto'){ st.className='fst auto'; tx.textContent='🌐 Auto fetch — Wikipedia · DuckDuckGo · Google News · YouTube'; }
   else if(MODE==='provided'){ st.className='fst manual'; tx.textContent='📎 Provided data only — your PDF + Links + YouTube'; }
@@ -811,6 +794,7 @@ function qf(co,pdf,lnk){
   document.getElementById('cinput').value=co;
   document.getElementById('pdfin').value=pdf||'';
   document.getElementById('lnkin').value=lnk||'';
+  
   if(pdf||lnk){ MODE='both'; } else { MODE='auto'; }
   updateModeUI();
   document.getElementById('cinput').focus();
@@ -855,7 +839,7 @@ async function doAnalyze(){
     hideLoading();
     let msg=e.message;
     if(msg.includes('Failed to fetch')||msg.includes('NetworkError')){
-      msg='Cannot reach n8n.\n① Check n8n is running  ② ngrok is active  ③ Webhook URL is correct  ④ Workflow is toggled ON';
+      msg='Cannot reach n8n.\n① Check n8n is running  ② ngrok is active  ③ Webhook URL is correct  ④ CORS is enabled';
     }
     showErr(msg);
     setConn('off');
@@ -937,7 +921,6 @@ function animScore(target){
   fill.style.stroke=col;
   let n=0; const step=target/80;
   const iv=setInterval(()=>{ n=Math.min(n+step,target); num.textContent=Math.round(n); if(n>=target)clearInterval(iv); },18);
-  // r=68 → circumference ≈ 427
   setTimeout(()=>{ fill.style.strokeDashoffset=427-(427*target/100); },100);
 }
 
@@ -1017,7 +1000,6 @@ function showLoading(co){
   ['ls1','ls2','ls3','ls4'].forEach(id=>{ const el=document.getElementById(id); el.className='lstep'; });
   ['la1','la2','la3'].forEach(id=>document.getElementById(id).className='larr');
 
-  // chips
   const srcArr = MODE==='auto'
     ? [{i:0,l:'🌐 Wikipedia'},{i:1,l:'🦆 DuckDuckGo'},{i:2,l:'📰 Google News'},{i:3,l:'🎥 YouTube'}]
     : MODE==='both'
