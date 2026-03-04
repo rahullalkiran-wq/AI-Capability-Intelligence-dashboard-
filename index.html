@@ -755,13 +755,29 @@ const SRC_DETAILS = {
 // ══════════════════════════════════════
 // INIT
 // ══════════════════════════════════════
-window.addEventListener('DOMContentLoaded',()=>{
-  const wh = localStorage.getItem('vay_wh');
-  if(wh){ document.getElementById('whinput').value=wh; document.getElementById('whinput').classList.add('ok'); setConn('live'); setWhSt('✅ Connected','var(--green)'); }
+window.addEventListener('DOMContentLoaded', () => {
+  // 1. Set your permanent ngrok URL as the absolute default
+  const defaultWebhook = 'https://clemently-changeful-krista.ngrok-free.dev/webhook/analyze-company';
+  
+  // 2. We bypass local storage on load so it ALWAYS uses the ngrok link
+  const activeWh = defaultWebhook; 
+  
+  // 3. Populate the input field in the UI
+  const whInput = document.getElementById('whinput');
+  whInput.value = activeWh;
+  
+  // 4. Force the UI into a "Connected" state visually
+  whInput.classList.add('ok'); 
+  setConn('live'); 
+  setWhSt('✅ Connected','var(--green)');
+  
+  // 5. Save it to local storage so the Analyze button knows exactly where to send data
+  localStorage.setItem('vay_wh', activeWh);
+  
   updateModeUI();
   renderHist();
+  document.getElementById('cinput').addEventListener('keydown',e=>{ if(e.key==='Enter') doAnalyze(); });
 });
-
 // ══════════════════════════════════════
 // WEBHOOK
 // ══════════════════════════════════════
